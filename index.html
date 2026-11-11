@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f3eb">
+  <title>Café MDL — Compte des ventes</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.51.0/dist/tabler-icons.min.css">
+  <style>
+    :root {
+      --ink: #252c25;
+      --muted: #72786e;
+      --paper: #f6f3eb;
+      --card: #fffefa;
+      --line: #e8e4d9;
+      --green: #285943;
+      --green-dark: #1e4634;
+      --green-soft: #eaf1e8;
+      --orange: #e47742;
+      --orange-soft: #fff0e7;
+      --shadow: 0 12px 30px rgba(47, 55, 42, .07);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 132px; }
+    body { margin: 0; color: var(--ink); background: var(--paper); }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(246, 243, 235, .96); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(224, 220, 208, .9);
+    }
+    .top-inner { max-width: 1100px; margin: auto; padding: 13px 24px 0; }
+    .brand-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; letter-spacing: -.03em; }
+    .brand-mark {
+      display: grid; place-items: center; width: 38px; height: 38px; border-radius: 13px;
+      background: var(--green); color: white; font-size: 13px; letter-spacing: .04em;
+    }
+    .brand small { display: block; color: var(--muted); font-weight: 600; letter-spacing: .02em; font-size: 11px; margin-top: 1px; }
+    .today-label { color: var(--muted); font-size: 13px; font-weight: 600; }
+    .nav { display: flex; gap: 8px; overflow-x: auto; padding: 13px 0 12px; scrollbar-width: none; }
+    .nav::-webkit-scrollbar { display: none; }
+    .nav-icon { font-size: 16px; margin-right: 4px; vertical-align: -2px; }
+    .category-icon { color: var(--green); font-size: 22px; margin-right: 8px; vertical-align: -3px; }
+    .nav a {
+      flex: 0 0 auto; text-decoration: none; color: #465047; background: #eeece4;
+      border-radius: 999px; padding: 9px 14px; font-size: 13px; font-weight: 700;
+      transition: background .15s, color .15s;
+    }
+    .nav a:hover, .nav a:focus-visible { background: var(--green); color: white; outline: none; }
+    main { max-width: 1100px; padding: 30px 24px 70px; margin: 0 auto; }
+    .intro { display: grid; grid-template-columns: 1fr auto; gap: 25px; align-items: end; margin-bottom: 20px; }
+    .eyebrow { color: var(--orange); font-weight: 800; font-size: 11px; letter-spacing: .13em; text-transform: uppercase; margin: 0 0 8px; }
+    h1 { font-size: clamp(29px, 4vw, 42px); line-height: 1.06; letter-spacing: -.045em; margin: 0; }
+    .intro-copy { max-width: 610px; color: var(--muted); margin: 10px 0 0; line-height: 1.55; font-size: 14px; }
+    .settings {
+      min-width: 330px; display: flex; align-items: end; gap: 14px;
+      background: var(--card); border: 1px solid var(--line); border-radius: 17px; padding: 14px;
+      box-shadow: var(--shadow);
+    }
+    .field { display: grid; gap: 6px; }
+    .field label, .field-label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 800; }
+    input[type="date"] { border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; color: var(--ink); background: white; min-height: 40px; }
+    .shift-toggle { display: flex; padding: 3px; background: #f0eee7; border-radius: 11px; }
+    .shift-toggle button { border: 0; background: transparent; padding: 8px 11px; border-radius: 8px; color: #5d665d; font-size: 12px; font-weight: 750; }
+    .shift-toggle button[aria-pressed="true"] { color: white; background: var(--green); box-shadow: 0 2px 6px rgba(33, 65, 48, .18); }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 31px; }
+    .stat {
+      background: var(--green); color: white; border-radius: 17px; padding: 17px 19px;
+      display: flex; align-items: center; justify-content: space-between; gap: 15px;
+    }
+    .stat.secondary { background: var(--card); border: 1px solid var(--line); color: var(--ink); }
+    .stat-label { opacity: .76; font-weight: 700; font-size: 12px; }
+    .stat.secondary .stat-label { color: var(--muted); opacity: 1; }
+    .stat strong { display: block; font-size: 27px; letter-spacing: -.04em; margin-top: 2px; }
+    .stat-icon { font-size: 25px; opacity: .9; display: inline-flex; align-items: center; }
+    .stat-icon .ti { font-size: 25px; }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 15px; margin: 31px 2px 12px; }
+    .section-heading h2 { font-size: 22px; letter-spacing: -.035em; margin: 0; }
+    .section-heading p { color: var(--muted); font-size: 12px; margin: 4px 0 0; }
+    .category-total { color: var(--green); font-size: 12px; font-weight: 800; text-align: right; }
+    .category-card { background: var(--card); border: 1px solid var(--line); border-radius: 17px; overflow: hidden; box-shadow: var(--shadow); }
+    .category-top { height: 5px; background: var(--green); }
+    .category-card.chocolate .category-top { background: #925d3d; }
+    .category-card.chips .category-top { background: #d49638; }
+    .category-card.candy .category-top { background: #cf6c74; }
+    .product {
+      display: grid; grid-template-columns: minmax(170px, 1.5fr) minmax(190px, 1fr) minmax(115px, .8fr);
+      align-items: center; gap: 18px; padding: 13px 18px; border-bottom: 1px solid #efede6;
+    }
+    .product:last-child { border-bottom: 0; }
+    .product-name { font-size: 14px; font-weight: 750; }
+    .unit-price { color: var(--muted); font-size: 11px; margin-top: 3px; }
+    .counter { display: flex; align-items: center; gap: 10px; }
+    .counter button {
+      width: 36px; height: 36px; border-radius: 11px; border: 1px solid var(--line);
+      color: var(--green); background: white; font-size: 20px; line-height: 1;
+      display: grid; place-items: center; font-weight: 600;
+    }
+    .counter button:hover:not(:disabled) { border-color: var(--green); background: var(--green-soft); }
+    .counter button:focus-visible, .send-button:focus-visible, .copy-button:focus-visible { outline: 3px solid #f4b994; outline-offset: 2px; }
+    .counter button:disabled { color: #c4c7c0; cursor: default; }
+    .quantity { min-width: 26px; text-align: center; font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .counter-label { color: var(--muted); font-size: 11px; }
+    .product-total { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .product-total span { color: var(--muted); font-size: 11px; }
+    .product-total strong { font-size: 15px; font-variant-numeric: tabular-nums; }
+    .send-card {
+      margin-top: 34px; padding: 21px; background: #eaf1e8; border: 1px solid #dce8db;
+      border-radius: 18px; display: flex; justify-content: space-between; align-items: center; gap: 20px;
+    }
+    .send-card h2 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
+    .send-card p { margin: 6px 0 0; color: #5d6b5e; font-size: 12px; line-height: 1.5; max-width: 560px; }
+    .send-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 9px; }
+    .send-button, .copy-button {
+      border: 0; border-radius: 11px; padding: 12px 16px; font-size: 13px; font-weight: 800;
+    }
+    .send-button { color: white; background: var(--green); }
+    .send-button:hover { background: var(--green-dark); }
+    .copy-button { color: var(--green); background: white; border: 1px solid #d4e1d3; }
+    .copy-button:hover { background: #f7fbf6; }
+    .email-dialog { width: min(620px, calc(100vw - 24px)); max-width: 620px; max-height: calc(100vh - 24px); padding: 0; border: 1px solid var(--line); border-radius: 18px; color: var(--ink); background: var(--card); box-shadow: 0 24px 80px rgba(24, 37, 27, .24); }
+    .email-dialog::backdrop { background: rgba(26, 35, 28, .48); backdrop-filter: blur(3px); }
+    .email-dialog-inner { padding: 22px; }
+    .email-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .email-dialog h2 { margin: 0; font-size: 21px; letter-spacing: -.03em; }
+    .dialog-close { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); background: white; }
+    .email-dialog p { color: var(--muted); font-size: 13px; line-height: 1.5; margin: 10px 0 16px; }
+    .email-field { display: grid; gap: 6px; margin-top: 11px; }
+    .email-field label { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .email-field input, .email-field textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 11px; color: var(--ink); background: white; font: inherit; font-size: 13px; }
+    .email-field textarea { min-height: 190px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; line-height: 1.5; }
+    .email-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-top: 14px; }
+    .email-actions a { text-decoration: none; display: inline-flex; align-items: center; }
+    .email-copy-status { min-height: 18px; color: var(--green); font-size: 12px; font-weight: 700; }
+    .footnote { color: var(--muted); text-align: center; font-size: 11px; margin: 20px 0 0; }
+    @media (max-width: 760px) {
+      .top-inner { padding-left: 16px; padding-right: 16px; }
+      main { padding: 24px 16px 55px; }
+      .intro { grid-template-columns: 1fr; align-items: start; gap: 17px; }
+      .settings { min-width: 0; width: 100%; justify-content: space-between; }
+      .stats { gap: 9px; }
+      .stat { padding: 14px; border-radius: 14px; }
+      .stat strong { font-size: 23px; }
+      .product { grid-template-columns: 1fr auto; gap: 8px 12px; padding: 12px 14px; }
+      .product-name-wrap { grid-column: 1 / -1; }
+      .counter { grid-column: 1; }
+      .product-total { grid-column: 2; min-width: 120px; }
+      .send-card { align-items: flex-start; flex-direction: column; }
+      .send-actions { width: 100%; justify-content: stretch; }
+      .send-actions button { flex: 1; }
+      .email-dialog-inner { padding: 17px; }
+      .email-actions { align-items: stretch; flex-direction: column; }
+      .email-actions > * { justify-content: center; }
+    }
+    @media (max-width: 420px) {
+      .today-label { display: none; }
+      .settings { align-items: stretch; flex-direction: column; }
+      .settings .field { width: 100%; }
+      .shift-toggle { width: 100%; }
+      .shift-toggle button { flex: 1; }
+      .stat-icon { display: none; }
+      .stat-label { font-size: 10px; }
+      .stat strong { font-size: 20px; }
+      .category-total { max-width: 145px; line-height: 1.45; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="top-inner">
+      <div class="brand-row">
+        <div class="brand"><span class="brand-mark">MDL</span><span>Café MDL<small>COMPTES DES VENTES</small></span></div>
+        <div class="today-label" id="header-date"></div>
+      </div>
+      <nav class="nav" aria-label="Aller à une catégorie">
+        <a href="#boissons"><i class="ti ti-glass-full nav-icon" aria-hidden="true"></i>Boissons</a>
+        <a href="#chocolat"><i class="ti ti-chocolate nav-icon" aria-hidden="true"></i>Barres de chocolat</a>
+        <a href="#chips"><i class="ti ti-cookie nav-icon" aria-hidden="true"></i>Chips</a>
+        <a href="#bonbons"><i class="ti ti-candy nav-icon" aria-hidden="true"></i>Bonbons</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">La caisse de la cafétéria</p>
+        <h1 id="page-title">Compte des ventes</h1>
+        <p class="intro-copy">Compte les articles vendus au fil du service. Les quantités et montants sont gardés sur cet appareil, séparément pour le matin et l’après-midi.</p>
+      </div>
+      <div class="settings">
+        <div class="field">
+          <label for="sale-date">Date du compte</label>
+          <input id="sale-date" type="date">
+        </div>
+        <div class="field">
+          <span class="field-label">Service en cours</span>
+          <div class="shift-toggle" role="group" aria-label="Choisir le service">
+            <button type="button" data-shift="matin" aria-pressed="true">Matin</button>
+            <button type="button" data-shift="apres-midi" aria-pressed="false">Après-midi</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Totaux de la journée">
+      <div class="stat"><div><div class="stat-label">Total encaissé aujourd’hui</div><strong id="day-total">0,00 €</strong></div><span class="stat-icon" aria-hidden="true"><i class="ti ti-cash-register"></i></span></div>
+      <div class="stat secondary"><div><div class="stat-label">Articles du service sélectionné</div><strong id="shift-total">0 article</strong></div><span class="stat-icon" aria-hidden="true"><i class="ti ti-package"></i></span></div>
+    </section>
+
+    <div id="categories"></div>
+
+    <section class="send-card" aria-labelledby="send-title">
+      <div>
+        <h2 id="send-title">Terminé pour aujourd’hui ?</h2>
+        <p>Le récapitulatif inclut les ventes du matin et de l’après-midi, les quantités par article et tous les montants. L’e-mail sera préparé pour comptemdlallauch@yahoo.com.</p>
+      </div>
+      <div class="send-actions">
+        <button type="button" class="copy-button" id="copy-summary">Copier le récapitulatif</button>
+        <button type="button" class="send-button" id="send-summary"><i class="ti ti-mail" aria-hidden="true"></i> Préparer l’e-mail</button>
+      </div>
+    </section>
+    <p class="footnote">Les comptes sont conservés dans le navigateur de cet appareil. Pense à préparer l’e-mail avant de changer d’appareil.</p>
+  </main>
+
+  <dialog id="email-dialog" class="email-dialog" aria-labelledby="email-dialog-title">
+    <div class="email-dialog-inner">
+      <div class="email-dialog-head">
+        <h2 id="email-dialog-title">Récapitulatif prêt à envoyer</h2>
+        <button type="button" class="dialog-close" id="close-email-dialog" aria-label="Fermer"><i class="ti ti-x" aria-hidden="true"></i></button>
+      </div>
+      <p>Gmail s’ouvrira avec le destinataire et l’objet remplis. Le récapitulatif est copié automatiquement si ton navigateur l’autorise : colle-le dans le message avec Ctrl+V. Sinon, utilise le bouton de copie ci-dessous.</p>
+      <div class="email-field"><label for="email-recipient">Destinataire</label><input id="email-recipient" type="text" value="comptemdlallauch@yahoo.com" readonly></div>
+      <div class="email-field"><label for="email-subject">Objet</label><input id="email-subject" type="text" readonly></div>
+      <div class="email-field"><label for="email-body">Récapitulatif à copier</label><textarea id="email-body" readonly></textarea></div>
+      <div class="email-actions">
+        <button type="button" class="copy-button" id="copy-email-body">Copier le récapitulatif</button>
+        <a class="send-button" id="open-gmail" href="https://mail.google.com/mail/" target="_blank" rel="noopener noreferrer"><i class="ti ti-mail" aria-hidden="true"></i> Ouvrir Gmail</a>
+      </div>
+      <div class="email-copy-status" id="email-copy-status" role="status" aria-live="polite"></div>
+    </div>
+  </dialog>
+
+  <script>
+    const categories = [
+      {
+        id: "boissons", title: "Boissons", icon: "glass-full", className: "drinks",
+        description: "Toutes les boissons — 1 € l’unité.",
+        products: [
+          { name: "Oasis", cents: 100 }, { name: "Oasis cassis", cents: 100 },
+          { name: "Lipton", cents: 100 }, { name: "Schweppes", cents: 100 },
+          { name: "Coca", cents: 100 }, { name: "Orengina", cents: 100 },
+          { name: "Coca-cherry", cents: 100 }, { name: "Fanta citron", cents: 100 },
+          { name: "Fanta fruit du dragon", cents: 100 }, { name: "7up", cents: 100 },
+          { name: "Fanta cassis", cents: 100 }, { name: "Fanta", cents: 100 },
+          { name: "Capri-sun", cents: 100 }
+        ]
+      },
+      {
+        id: "chocolat", title: "Barres de chocolat", icon: "chocolate", className: "chocolate",
+        description: "1 € l’unité.",
+        products: [
+          { name: "Bueno", cents: 100 }, { name: "Bueno white", cents: 100 },
+          { name: "Lion", cents: 100 }, { name: "Mars", cents: 100 },
+          { name: "Kitkat", cents: 100 }, { name: "M&m’s", cents: 100 },
+          { name: "Bunty", cents: 100 }, { name: "Twix", cents: 100 }
+        ]
+      },
+      {
+        id: "chips", title: "Chips", icon: "cookie", className: "chips",
+        description: "1,50 € le paquet.",
+        products: [
+          { name: "Chips", cents: 150 }, { name: "Chips poulet", cents: 150 },
+          { name: "Chips bbq", cents: 150 }
+        ]
+      },
+      {
+        id: "bonbons", title: "Bonbons", icon: "candy", className: "candy",
+        description: "1 € l’unité, sauf les tarifs indiqués.",
+        products: [
+          { name: "Chuppa chups", cents: 50 },
+          { name: "Tête Brûlées", cents: 50, packSize: 3 },
+          { name: "Dragibu", cents: 100 }, { name: "Orengina", cents: 100 },
+          { name: "Coca", cents: 100 }
+        ]
+      }
+    ];
+
+    const storagePrefix = "mdl-cafeteria-sales-v1-";
+    const currency = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
+    const dateInput = document.getElementById("sale-date");
+    let activeShift = "matin";
+
+    function localDateValue() {
+      const d = new Date();
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+    function money(cents) { return currency.format(cents / 100); }
+    function longDate(value) {
+      if (!value) return "";
+      const parts = value.split("-").map(Number);
+      return new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(new Date(parts[0], parts[1] - 1, parts[2]));
+    }
+    function loadDay(date) {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storagePrefix + date) || "{}");
+        return {
+          matin: parsed.matin && typeof parsed.matin === "object" ? parsed.matin : {},
+          "apres-midi": parsed["apres-midi"] && typeof parsed["apres-midi"] === "object" ? parsed["apres-midi"] : {}
+        };
+      } catch (_) {
+        return { matin: {}, "apres-midi": {} };
+      }
+    }
+    function saveDay(date, data) {
+      localStorage.setItem(storagePrefix + date, JSON.stringify(data));
+    }
+    function amountFor(product, quantity) {
+      if (!product.packSize) return quantity * product.cents;
+      return Math.round(quantity * product.cents / product.packSize);
+    }
+    function quantityFor(data, shift, product) {
+      const value = Number(data[shift][product.name]);
+      return Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
+    }
+    function summarizeShift(data, shift) {
+      let units = 0;
+      let cents = 0;
+      categories.forEach(function(category) {
+        category.products.forEach(function(product) {
+          const quantity = quantityFor(data, shift, product);
+          units += quantity;
+          cents += amountFor(product, quantity);
+        });
+      });
+      return { units: units, cents: cents };
+    }
+    function makeElement(tag, className, text) {
+      const element = document.createElement(tag);
+      if (className) element.className = className;
+      if (text !== undefined) element.textContent = text;
+      return element;
+    }
+    function updateCount(product, difference) {
+      const date = dateInput.value;
+      if (!date) return;
+      const day = loadDay(date);
+      const current = quantityFor(day, activeShift, product);
+      const step = product.packSize || 1;
+      day[activeShift][product.name] = Math.max(0, current + difference * step);
+      saveDay(date, day);
+      render();
+    }
+    function render() {
+      const date = dateInput.value;
+      if (!date) return;
+      const data = loadDay(date);
+      document.getElementById("header-date").textContent = longDate(date);
+      document.getElementById("day-total").textContent =
+        money(summarizeShift(data, "matin").cents + summarizeShift(data, "apres-midi").cents);
+      const currentSummary = summarizeShift(data, activeShift);
+      document.getElementById("shift-total").textContent =
+        currentSummary.units + (currentSummary.units > 1 ? " articles" : " article") + " · " + money(currentSummary.cents);
+
+      const root = document.getElementById("categories");
+      root.replaceChildren();
+      categories.forEach(function(category) {
+        let categoryUnits = 0;
+        let categoryCents = 0;
+        let dayUnits = 0;
+        let dayCents = 0;
+        const section = makeElement("section");
+        section.id = category.id;
+        section.setAttribute("aria-labelledby", category.id + "-title");
+        const heading = makeElement("div", "section-heading");
+        const titleWrap = document.createElement("div");
+        const title = makeElement("h2", "");
+        const titleIcon = makeElement("i", "ti ti-" + category.icon + " category-icon");
+        titleIcon.setAttribute("aria-hidden", "true");
+        title.appendChild(titleIcon);
+        title.appendChild(document.createTextNode(" " + category.title));
+        title.id = category.id + "-title";
+        titleWrap.appendChild(title);
+        titleWrap.appendChild(makeElement("p", "", category.description));
+        heading.appendChild(titleWrap);
+        const totalLabel = makeElement("div", "category-total");
+        heading.appendChild(totalLabel);
+        const card = makeElement("div", "category-card " + category.className);
+        card.appendChild(makeElement("div", "category-top"));
+        category.products.forEach(function(product) {
+          const shiftQty = quantityFor(data, activeShift, product);
+          const morningQty = quantityFor(data, "matin", product);
+          const afternoonQty = quantityFor(data, "apres-midi", product);
+          const shiftCents = amountFor(product, shiftQty);
+          categoryUnits += shiftQty;
+          categoryCents += shiftCents;
+          dayUnits += morningQty + afternoonQty;
+          dayCents += amountFor(product, morningQty) + amountFor(product, afternoonQty);
+
+          const row = makeElement("div", "product");
+          const nameWrap = makeElement("div", "product-name-wrap");
+          nameWrap.appendChild(makeElement("div", "product-name", product.name));
+          const unitText = product.packSize ? money(product.cents) + " le lot de " + product.packSize : money(product.cents) + " l’unité";
+          nameWrap.appendChild(makeElement("div", "unit-price", unitText + (product.packSize ? " · +/− par " + product.packSize : "")));
+          row.appendChild(nameWrap);
+
+          const counter = makeElement("div", "counter");
+          const minus = makeElement("button", "");
+          minus.appendChild(makeElement("i", "ti ti-minus"));
+          minus.type = "button";
+          minus.disabled = shiftQty === 0;
+          minus.setAttribute("aria-label", product.packSize ? "Retirer un lot de " + product.packSize + " de " + product.name : "Retirer une vente de " + product.name);
+          minus.addEventListener("click", function() { updateCount(product, -1); });
+          counter.appendChild(minus);
+          counter.appendChild(makeElement("span", "quantity", String(shiftQty)));
+          counter.appendChild(makeElement("span", "counter-label", product.packSize ? "pièces" : "vendu"));
+          const plus = makeElement("button", "");
+          plus.appendChild(makeElement("i", "ti ti-plus"));
+          plus.type = "button";
+          plus.setAttribute("aria-label", product.packSize ? "Ajouter un lot de " + product.packSize + " de " + product.name : "Ajouter une vente de " + product.name);
+          plus.addEventListener("click", function() { updateCount(product, 1); });
+          counter.appendChild(plus);
+          row.appendChild(counter);
+
+          const total = makeElement("div", "product-total");
+          total.appendChild(makeElement("span", "amount-label", "Montant du service"));
+          total.appendChild(makeElement("strong", "", money(shiftCents)));
+          row.appendChild(total);
+          card.appendChild(row);
+        });
+        totalLabel.textContent =
+          "Service : " + categoryUnits + " · " + money(categoryCents) +
+          "  |  Journée : " + dayUnits + " · " + money(dayCents);
+        section.appendChild(heading);
+        section.appendChild(card);
+        root.appendChild(section);
+      });
+      document.querySelectorAll("[data-shift]").forEach(function(button) {
+        button.setAttribute("aria-pressed", String(button.dataset.shift === activeShift));
+      });
+    }
+
+    function summaryText() {
+      const date = dateInput.value;
+      const data = loadDay(date);
+      const morning = summarizeShift(data, "matin");
+      const afternoon = summarizeShift(data, "apres-midi");
+      const lines = [
+        "COMPTE CAFÉTÉRIA MDL",
+        "Date : " + longDate(date),
+        "Service sélectionné dans le site : " + (activeShift === "matin" ? "Matin" : "Après-midi"),
+        "",
+        "RÉCAPITULATIF DES VENTES"
+      ];
+      categories.forEach(function(category) {
+        lines.push("");
+        lines.push(category.title.toUpperCase());
+        category.products.forEach(function(product) {
+          const m = quantityFor(data, "matin", product);
+          const a = quantityFor(data, "apres-midi", product);
+          const price = product.packSize
+            ? money(product.cents) + " les " + product.packSize
+            : money(product.cents) + " l’unité";
+          lines.push(
+            product.name + " (" + price + ") — matin : " + m + " / " + money(amountFor(product, m)) +
+            " ; après-midi : " + a + " / " + money(amountFor(product, a)) +
+            " ; journée : " + (m + a) + " vendu(s) / " + money(amountFor(product, m) + amountFor(product, a))
+          );
+        });
+        const categoryMorningUnits = category.products.reduce(function(sum, p) { return sum + quantityFor(data, "matin", p); }, 0);
+        const categoryAfternoonUnits = category.products.reduce(function(sum, p) { return sum + quantityFor(data, "apres-midi", p); }, 0);
+        const categoryMorningCents = category.products.reduce(function(sum, p) { return sum + amountFor(p, quantityFor(data, "matin", p)); }, 0);
+        const categoryAfternoonCents = category.products.reduce(function(sum, p) { return sum + amountFor(p, quantityFor(data, "apres-midi", p)); }, 0);
+        lines.push("Total " + category.title.toLowerCase() + " — matin : " + categoryMorningUnits + " / " + money(categoryMorningCents) +
+          " ; après-midi : " + categoryAfternoonUnits + " / " + money(categoryAfternoonCents) +
+          " ; journée : " + money(categoryMorningCents + categoryAfternoonCents));
+      });
+      lines.push("");
+      lines.push("TOTAL MATIN : " + morning.units + " article(s) — " + money(morning.cents));
+      lines.push("TOTAL APRÈS-MIDI : " + afternoon.units + " article(s) — " + money(afternoon.cents));
+      lines.push("TOTAL JOURNÉE : " + (morning.units + afternoon.units) + " article(s) — " + money(morning.cents + afternoon.cents));
+      return lines.join("\n");
+    }
+
+    dateInput.value = localDateValue();
+    dateInput.addEventListener("change", render);
+    document.querySelectorAll("[data-shift]").forEach(function(button) {
+      button.addEventListener("click", function() {
+        activeShift = button.dataset.shift;
+        render();
+      });
+    });
+    document.getElementById("send-summary").addEventListener("click", function() {
+      const subject = "Compte cafétéria MDL - " + dateInput.value;
+      const body = summaryText();
+      const gmailComposeUrl = "https://mail.google.com/mail/?view=cm&fs=1&to=" +
+        encodeURIComponent("comptemdlallauch@yahoo.com") + "&su=" + encodeURIComponent(subject);
+      document.getElementById("email-subject").value = subject;
+      document.getElementById("email-body").value = body;
+      document.getElementById("open-gmail").href = gmailComposeUrl;
+      const copyStatus = document.getElementById("email-copy-status");
+      copyStatus.textContent = "Copie du récapitulatif…";
+      document.getElementById("email-dialog").showModal();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(body).then(function() {
+          copyStatus.textContent = "Récapitulatif copié : colle-le dans Gmail avec Ctrl+V.";
+        }).catch(function() {
+          copyStatus.textContent = "Clique sur « Copier le récapitulatif » avant de passer à Gmail.";
+        });
+      } else {
+        copyStatus.textContent = "Clique sur « Copier le récapitulatif » avant de passer à Gmail.";
+      }
+    });
+    document.getElementById("close-email-dialog").addEventListener("click", function() {
+      document.getElementById("email-dialog").close();
+    });
+    document.getElementById("email-dialog").addEventListener("click", function(event) {
+      if (event.target === event.currentTarget) event.currentTarget.close();
+    });
+    document.querySelectorAll("#email-recipient, #email-subject").forEach(function(input) {
+      input.addEventListener("click", function() { input.select(); });
+    });
+    document.getElementById("copy-email-body").addEventListener("click", async function() {
+      const body = document.getElementById("email-body");
+      const status = document.getElementById("email-copy-status");
+      try {
+        await navigator.clipboard.writeText(body.value);
+        status.textContent = "Récapitulatif copié. Tu peux le coller dans Yahoo Mail.";
+      } catch (_) {
+        body.focus();
+        body.select();
+        status.textContent = "Texte sélectionné : appuie sur Ctrl+C pour le copier.";
+      }
+    });
+    document.getElementById("copy-summary").addEventListener("click", async function(event) {
+      const button = event.currentTarget;
+      try {
+        await navigator.clipboard.writeText(summaryText());
+        button.textContent = "Récapitulatif copié ✓";
+        setTimeout(function() { button.textContent = "Copier le récapitulatif"; }, 2200);
+      } catch (_) {
+        window.prompt("Copie le récapitulatif ci-dessous :", summaryText());
+      }
+    });
+    render();
+  </script>
+</body>
+</html>
