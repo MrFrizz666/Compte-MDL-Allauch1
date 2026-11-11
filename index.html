@@ -117,24 +117,8 @@
     .send-button, .copy-button {
       border: 0; border-radius: 11px; padding: 12px 16px; font-size: 13px; font-weight: 800;
     }
-    .send-button { color: white; background: var(--green); }
-    .send-button:hover { background: var(--green-dark); }
     .copy-button { color: var(--green); background: white; border: 1px solid #d4e1d3; }
     .copy-button:hover { background: #f7fbf6; }
-    .email-dialog { width: min(620px, calc(100vw - 24px)); max-width: 620px; max-height: calc(100vh - 24px); padding: 0; border: 1px solid var(--line); border-radius: 18px; color: var(--ink); background: var(--card); box-shadow: 0 24px 80px rgba(24, 37, 27, .24); }
-    .email-dialog::backdrop { background: rgba(26, 35, 28, .48); backdrop-filter: blur(3px); }
-    .email-dialog-inner { padding: 22px; }
-    .email-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
-    .email-dialog h2 { margin: 0; font-size: 21px; letter-spacing: -.03em; }
-    .dialog-close { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); background: white; }
-    .email-dialog p { color: var(--muted); font-size: 13px; line-height: 1.5; margin: 10px 0 16px; }
-    .email-field { display: grid; gap: 6px; margin-top: 11px; }
-    .email-field label { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-    .email-field input, .email-field textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 11px; color: var(--ink); background: white; font: inherit; font-size: 13px; }
-    .email-field textarea { min-height: 190px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; line-height: 1.5; }
-    .email-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-top: 14px; }
-    .email-actions a { text-decoration: none; display: inline-flex; align-items: center; }
-    .email-copy-status { min-height: 18px; color: var(--green); font-size: 12px; font-weight: 700; }
     .footnote { color: var(--muted); text-align: center; font-size: 11px; margin: 20px 0 0; }
     @media (max-width: 760px) {
       .top-inner { padding-left: 16px; padding-right: 16px; }
@@ -151,9 +135,6 @@
       .send-card { align-items: flex-start; flex-direction: column; }
       .send-actions { width: 100%; justify-content: stretch; }
       .send-actions button { flex: 1; }
-      .email-dialog-inner { padding: 17px; }
-      .email-actions { align-items: stretch; flex-direction: column; }
-      .email-actions > * { justify-content: center; }
     }
     @media (max-width: 420px) {
       .today-label { display: none; }
@@ -216,33 +197,14 @@
     <section class="send-card" aria-labelledby="send-title">
       <div>
         <h2 id="send-title">Terminé pour aujourd’hui ?</h2>
-        <p>Le récapitulatif inclut les ventes du matin et de l’après-midi, les quantités par article et tous les montants. L’e-mail sera préparé pour comptemdlallauch@yahoo.com.</p>
+        <p>Copie le récapitulatif puis colle-le dans un nouveau message Gmail adressé à comptemdlallauch@yahoo.com. Il comprend les ventes du matin et de l’après-midi, avec les quantités et les montants.</p>
       </div>
       <div class="send-actions">
         <button type="button" class="copy-button" id="copy-summary">Copier le récapitulatif</button>
-        <button type="button" class="send-button" id="send-summary"><i class="ti ti-mail" aria-hidden="true"></i> Préparer l’e-mail</button>
       </div>
     </section>
-    <p class="footnote">Les comptes sont conservés dans le navigateur de cet appareil. Pense à préparer l’e-mail avant de changer d’appareil.</p>
+    <p class="footnote">Les comptes sont conservés dans le navigateur de cet appareil. Copie le récapitulatif avant de changer d’appareil.</p>
   </main>
-
-  <dialog id="email-dialog" class="email-dialog" aria-labelledby="email-dialog-title">
-    <div class="email-dialog-inner">
-      <div class="email-dialog-head">
-        <h2 id="email-dialog-title">Récapitulatif prêt à envoyer</h2>
-        <button type="button" class="dialog-close" id="close-email-dialog" aria-label="Fermer"><i class="ti ti-x" aria-hidden="true"></i></button>
-      </div>
-      <p>Gmail s’ouvrira avec le destinataire et l’objet remplis. Le récapitulatif est copié automatiquement si ton navigateur l’autorise : colle-le dans le message avec Ctrl+V. Sinon, utilise le bouton de copie ci-dessous.</p>
-      <div class="email-field"><label for="email-recipient">Destinataire</label><input id="email-recipient" type="text" value="comptemdlallauch@yahoo.com" readonly></div>
-      <div class="email-field"><label for="email-subject">Objet</label><input id="email-subject" type="text" readonly></div>
-      <div class="email-field"><label for="email-body">Récapitulatif à copier</label><textarea id="email-body" readonly></textarea></div>
-      <div class="email-actions">
-        <button type="button" class="copy-button" id="copy-email-body">Copier le récapitulatif</button>
-        <a class="send-button" id="open-gmail" href="https://mail.google.com/mail/" target="_blank" rel="noopener noreferrer"><i class="ti ti-mail" aria-hidden="true"></i> Ouvrir Gmail</a>
-      </div>
-      <div class="email-copy-status" id="email-copy-status" role="status" aria-live="polite"></div>
-    </div>
-  </dialog>
 
   <script>
     const categories = [
@@ -492,48 +454,6 @@
         activeShift = button.dataset.shift;
         render();
       });
-    });
-    document.getElementById("send-summary").addEventListener("click", function() {
-      const subject = "Compte cafétéria MDL - " + dateInput.value;
-      const body = summaryText();
-      const gmailComposeUrl = "https://mail.google.com/mail/?view=cm&fs=1&to=" +
-        encodeURIComponent("comptemdlallauch@yahoo.com") + "&su=" + encodeURIComponent(subject);
-      document.getElementById("email-subject").value = subject;
-      document.getElementById("email-body").value = body;
-      document.getElementById("open-gmail").href = gmailComposeUrl;
-      const copyStatus = document.getElementById("email-copy-status");
-      copyStatus.textContent = "Copie du récapitulatif…";
-      document.getElementById("email-dialog").showModal();
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(body).then(function() {
-          copyStatus.textContent = "Récapitulatif copié : colle-le dans Gmail avec Ctrl+V.";
-        }).catch(function() {
-          copyStatus.textContent = "Clique sur « Copier le récapitulatif » avant de passer à Gmail.";
-        });
-      } else {
-        copyStatus.textContent = "Clique sur « Copier le récapitulatif » avant de passer à Gmail.";
-      }
-    });
-    document.getElementById("close-email-dialog").addEventListener("click", function() {
-      document.getElementById("email-dialog").close();
-    });
-    document.getElementById("email-dialog").addEventListener("click", function(event) {
-      if (event.target === event.currentTarget) event.currentTarget.close();
-    });
-    document.querySelectorAll("#email-recipient, #email-subject").forEach(function(input) {
-      input.addEventListener("click", function() { input.select(); });
-    });
-    document.getElementById("copy-email-body").addEventListener("click", async function() {
-      const body = document.getElementById("email-body");
-      const status = document.getElementById("email-copy-status");
-      try {
-        await navigator.clipboard.writeText(body.value);
-        status.textContent = "Récapitulatif copié. Tu peux le coller dans Yahoo Mail.";
-      } catch (_) {
-        body.focus();
-        body.select();
-        status.textContent = "Texte sélectionné : appuie sur Ctrl+C pour le copier.";
-      }
     });
     document.getElementById("copy-summary").addEventListener("click", async function(event) {
       const button = event.currentTarget;
